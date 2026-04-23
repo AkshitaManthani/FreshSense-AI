@@ -37,7 +37,8 @@ In this mode, simulated temperature and humidity data are generated so the syste
    pip install pyserial flask numpy pandas scikit-learn
 3. Upload dht_sensor.ino to Arduino using Arduino IDE
 4. py -3.11 freshsense_final.py
-5. Open browser: http://localhost:5000
+5. Local Development: http://localhost:5000
+   Production Deployment: https://freshsense-ai.onrender.com
 
 ## Email Alerts Setup
 1. Go to myaccount.google.com/apppasswords
@@ -82,3 +83,26 @@ Close Arduino IDE Serial Monitor before running the Python script
 ## College
 Vignan's Institute of Management and Technology for Women
 B.Tech 3rd Year — CSE (AI & ML)
+
+## Deployment (Render)
+This project is deployed using Render cloud platform.
+
+Steps:
+1. Push code to GitHub
+2. Connect repository to Render
+3. Set Build Command:
+   pip install -r requirements.txt
+
+4. Set Start Command:
+   gunicorn freshsense_final:app
+
+5. Add Environment Variables:
+   EMAIL_SENDER
+   EMAIL_PASSWORD
+   EMAIL_RECEIVER
+
+Arduino sensor integration works only in local environment.
+On cloud deployment (Render), the system runs in Demo Mode using simulated data.
+
+## Live Demo
+https://freshsense-ai.onrender.com

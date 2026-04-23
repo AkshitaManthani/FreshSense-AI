@@ -1,1 +1,1 @@
-web: python freshsense_final.py
+web: gunicorn freshsense_final:app

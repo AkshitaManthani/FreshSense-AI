@@ -1,1 +1,5 @@
-pip freeze > requirements.txt
+flask
+numpy
+pandas
+scikit-learn
+gunicorn

@@ -809,25 +809,8 @@ setInterval(poll,3000);
 </body>
 </html>
 """
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
-if __name__=="__main__":
-    print(f"\n  FreshSense AI ready!")
-    print(f"  Open: http://localhost:{PORT}")
-    print(f"  Press Ctrl+C to stop.\n")
-    time.sleep(1.5)
-    import webbrowser
-    url = f"http://127.0.0.1:{PORT}"
-    browsers = [
-        "C:/Program Files/Google/Chrome/Application/chrome.exe",
-        "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    ]
-    opened = False
-    for b in browsers:
-        if os.path.exists(b):
-            import subprocess
-            subprocess.Popen([b, url])
-            opened = True
-            break
-    if not opened:
-        webbrowser.open(url)
-    app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False)

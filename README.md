@@ -5,7 +5,7 @@
 FreshSense is a real-time shelf life prediction system that uses a DHT22 
 sensor connected to Arduino Uno to monitor temperature and humidity. 
 A Random Forest AI model predicts remaining shelf life of packaged foods 
-based on actual storage conditions.
+based on actual storage conditions or simulated data (Demo Mode).
 
 ## Features
 - Live temperature and humidity monitoring
@@ -15,6 +15,10 @@ based on actual storage conditions.
 - Email alerts via Gmail
 - Mobile responsive dashboard
 - CSV data logging
+
+## Demo Mode
+If Arduino is not connected, FreshSense automatically switches to Demo Mode.
+In this mode, simulated temperature and humidity data are generated so the system can still run and demonstrate AI predictions.
 
 ## Hardware Required
 - Arduino Uno
@@ -32,7 +36,7 @@ based on actual storage conditions.
 2. Install required packages:
    pip install pyserial flask numpy pandas scikit-learn
 3. Upload dht_sensor.ino to Arduino using Arduino IDE
-4. Run: python freshsense_final.py
+4. py -3.11 freshsense_final.py
 5. Open browser: http://localhost:5000
 
 ## Email Alerts Setup
@@ -40,6 +44,28 @@ based on actual storage conditions.
 2. Create an App Password
 3. Update EMAIL_SENDER, EMAIL_PASSWORD, EMAIL_RECEIVER in freshsense_final.py
 4. Set EMAIL_ENABLED = True
+
+## Troubleshooting
+
+### ModuleNotFoundError (numpy, pandas, etc.)
+Run:
+pip install numpy pandas flask scikit-learn pyserial
+
+### Python Version Issues
+Ensure Python 3.11 is installed:
+py -3.11 --version
+
+### File Not Found Error
+Navigate to project folder before running:
+cd path/to/project
+
+### Arduino Not Detected
+- Check USB connection
+- Ensure correct COM port
+- If not found, system will run in Demo Mode
+
+### Serial Port Error
+Close Arduino IDE Serial Monitor before running the Python script
 
 ## Project Structure
 - freshsense_final.py — Main Python application

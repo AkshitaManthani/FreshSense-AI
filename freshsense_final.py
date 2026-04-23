@@ -12,6 +12,9 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import numpy as np
 import pandas as pd
+
+data = pd.read_csv("readings.csv")
+print(data.head())
 from datetime import datetime
 from flask import Flask, jsonify, render_template_string, request
 from sklearn.ensemble import RandomForestRegressor
@@ -159,6 +162,7 @@ data = {
 lock = threading.Lock()
 
 # ---------------- FIND ARDUINO --------------------
+
 def find_port():
     ports = serial.tools.list_ports.comports()
     for p in ports:
@@ -171,89 +175,33 @@ def find_port():
 # ------------------ SERIAL THREAD -----------------------------
 def reader():
     port = find_port()
+
     if not port:
-        with lock: data["error"] = "No Arduino found. Plug in USB cable."
-        print("ERROR: No Arduino found!")
-        return
+        print("No Arduino found → Switching to DEMO mode")
 
-    with lock: data["port"] = port
-    print(f"Arduino on {port}")
+        while True:
+            t = round(np.random.uniform(20, 30), 1)
+            h = round(np.random.uniform(50, 80), 1)
+            ts = datetime.now().strftime("%H:%M:%S")
 
-    while True:
-        try:
-            print(f"Connecting to {port}...", end=" ")
-            ser = serial.Serial(port, BAUD, timeout=3)
-            time.sleep(2)
-            print("OK!")
             with lock:
-                data["connected"] = True
-                data["error"] = None
-
-            last_read = 0
-            while True:
-                try:
-                    line = ser.readline().decode("utf-8", errors="ignore").strip()
-                    if not line or "{" not in line:
-                        continue
-                    j = json.loads(line)
-                    if "temp" not in j or "humidity" not in j:
-                        continue
-
-                    # Throttle to once every 5 seconds
-                    now_ts = time.time()
-                    if now_ts - last_read < 5:
-                        continue
-                    last_read = now_ts
-
-                    t = round(float(j["temp"]), 1)
-                    h = round(float(j["humidity"]), 1)
-                    c = int(j.get("count", 0))
-                    ts = datetime.now().strftime("%H:%M:%S")
-
-                    with lock:
-                        data["temp"] = t
-                        data["hum"]  = h
-                        data["count"] = c
-                        data["ts"]   = ts
-                        data["connected"] = True
-                        data["error"] = None
-                        data["history"].append({"t":ts,"temp":t,"hum":h})
-                        if len(data["history"]) > 40:
-                            data["history"].pop(0)
-                        prods = list(data["monitored_products"])
-
-                    # Log to CSV
-                    new = not os.path.isfile(LOG)
-                    with open(LOG,"a",newline="") as f:
-                        w = csv.writer(f)
-                        if new: w.writerow(["Time","Temp","Humidity"])
-                        w.writerow([ts,t,h])
-
-                    print(f"[{ts}] Temp:{t}C  Hum:{h}%")
-
-                    # Check email alerts
-                    if prods:
-                        threading.Thread(target=check_emails, args=(prods,t,h), daemon=True).start()
-
-                except json.JSONDecodeError:
-                    continue
-                except serial.SerialException:
-                    print("Disconnected!")
-                    with lock: data["connected"] = False
-                    try: ser.close()
-                    except: pass
-                    time.sleep(3)
-                    break
-
-        except serial.SerialException as e:
-            print(f"Failed: {e}")
-            with lock:
+                data["temp"] = t
+                data["hum"] = h
+                data["count"] += 1
+                data["ts"] = ts
                 data["connected"] = False
-                data["error"] = f"Cannot open {port}: {e}"
+                data["error"] = "Demo mode"
+                data["history"].append({"t": ts, "temp": t, "hum": h})
+
+                if len(data["history"]) > 40:
+                    data["history"].pop(0)
+
+            print(f"[DEMO] Temp:{t}C Hum:{h}%")
             time.sleep(5)
 
+    else:
+        print(f"Arduino found on {port}")
 threading.Thread(target=reader, daemon=True).start()
-
 #--------------------FLASK APP --------------------------------
 app = Flask(__name__)
 
